@@ -1,0 +1,20 @@
+<html>
+<head>
+  <title>Holidays for {{thisyear}}</title>
+</head>
+<body>
+Holidays for {{thisyear}}.
+See also:
+{% for year in years %}
+   {% ifequal year thisyear %}
+     {{ year }}
+   {% else %}
+     <a href="/holiday/html/{{ year }}/">{{ year }}</a>
+   {% endifequal %}
+{% endfor %}
+<table>
+{% for holiday in holidays %}
+    <tr><td>{{ holiday.name }}</td><td>{{ holiday.date }}</td><td>{{ holiday.countries }}</td></tr>
+{% endfor %}
+</table>
+</body>
