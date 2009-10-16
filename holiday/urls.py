@@ -5,13 +5,10 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^holiday/', include('holiday.foo.urls')),
-
-    # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
-    # to INSTALLED_APPS to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
+    (r'^holiday/$', 'holiday.main.views.index'),
+    (r'^holiday/html/$', 'holiday.main.views.html_index'),
+    (r'^holiday/html/(\d{4})/$', 'holiday.main.views.html'),
+    (r'^holiday/ics/$', 'holiday.main.views.ics'),
+    (r'^holiday/xml/$', 'holiday.main.views.xml'),
     (r'^admin/(.*)', admin.site.root),
 )

@@ -8,13 +8,16 @@ class CountryAdmin(ModelAdmin):
     ]
     list_display = ['name']
     admin_order_field = 'name'
-    verbose_name_plural = 'Countries'
+
     
 site.register(Country, CountryAdmin)
 
 
 site.register(State)
 
+class HolidayAdmin(ModelAdmin):
+    list_display = ['name', 'definition', 'month', 'day']
+    admin_order_field = 'name'
 
-site.register(Holiday)
+site.register(Holiday, HolidayAdmin)
 

@@ -1,5 +1,11 @@
+import datetime
+
 from django.db.models import Model
-from django.db.models import CharField, DateField, ForeignKey, IntegerField
+from django.db.models import (CharField, DateField, ForeignKey, IntegerField,
+                              ManyToManyField)
+
+from holiday.definition import DefinitionParser
+from holiday.utils import formatday, formatmonth
 
 
 class Country(Model):
@@ -11,7 +17,15 @@ class Country(Model):
     def __unicode__(self):
         return u'<Country "%s">' % (self.name,)
     
-
+    @property
+    def states(self):
+        return State.objects.all().filter(country=self)
+    
+    @property
+    def holidays(self):
+        return Holiday.objects.all().filter(country=self)
+        
+        
 class State(Model):
     name = CharField(max_length=50)
     country = ForeignKey(Country)
@@ -19,32 +33,32 @@ class State(Model):
     def __unicode__(self):
         return u'<State "%s" in "%s">' % (self.name, self.country.name)
 
+    @property
+    def holidays(self):
+        return Holiday.objects.all().filter(state=self)
 
-MONTHS_CHOICES = [
-    (0, 'Not fixed'),
-    (1, 'January'),
-    (2, 'February'),
-    (3, 'March'),
-    (4, 'April'),
-    (5, 'May'),
-    (6, 'June'),
-    (7, 'July'),
-    (8, 'August'),
-    (9, 'September'),
-    (10, 'October'),
-    (11, 'November'),
-    (12, 'December'),
-]
 
-DAY_CHOICES = [
-    (0, 'Not fixed')
-] + [(i, str(i)) for i in range(1, 32)]
-
+MONTHS_CHOICES = [(0, 'Not fixed')] + [(i, formatmonth(i)) for i in range(1, 13)]
+DAY_CHOICES = [(0, 'Not fixed')] + [(i, formatday(i)) for i in range(1, 32)]
 
 class Holiday(Model):
     name = CharField(max_length=50)
+    definition = CharField(max_length=100, blank=True)
     month = IntegerField(default=0, choices=MONTHS_CHOICES)
     day = IntegerField(default=0, choices=DAY_CHOICES)
-    country = ForeignKey(Country, blank=True, null=True)
-    state = ForeignKey(State, blank=True, null=True)
+    country = ManyToManyField(Country, blank=True, null=True)
+    state = ManyToManyField(State, blank=True, null=True)
     
+    def __unicode__(self):
+        return u'<Holiday "%s">' % (self.name,)
+        
+    def getByCountryAndYear(self, countryName, year):    
+        country = Country.objects.get(name=countryName)
+        return Holiday.objects.all().filter(country=country)
+    
+    def getDateByYear(self, year):
+        if self.definition:
+            return DefinitionParser().parse(self.definition)(year)
+        else:
+            return datetime.date(year, self.month, self.day)
+
